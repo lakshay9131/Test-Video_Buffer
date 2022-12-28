@@ -1,10 +1,11 @@
 import * as React from 'react';
 import './style.css';
-const myMediaSource = new MediaSource();
+var myMediaSource;
 var videoTag;
 var videoSourceBuffer;
 function start() {
   videoTag = document.getElementById('myVideo');
+  myMediaSource = new MediaSource();
 
   console.log(myMediaSource);
   console.log(myMediaSource.readyState);
@@ -41,24 +42,29 @@ async function sourceOpen() {
     console.log(
       myMediaSource.readyState + '  --------- ' + myMediaSource.duration
     );
+  } else {
+    //adding
+    videoSourceBuffer = myMediaSource.addSourceBuffer(
+      'video/webm; codecs="vp8,vorbis"'
+    );
   }
 
   // 1. add source buffers
 
   //const audioSourceBuffer = myMediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
-  videoSourceBuffer = myMediaSource.addSourceBuffer(
-    'video/webm; codecs="vp8,vorbis"'
-  ); //avc1.64001e
+  //avc1.64001e
   console.log(myMediaSource);
   console.log(videoSourceBuffer.buffered);
   console.log(videoSourceBuffer.mode);
   var t =
     'https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.webm';
   // add(t);
+  //'https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.webm',
+
   const vidClips = [
+    'https://upload.wikimedia.org/wikipedia/commons/transcoded/8/87/Schlossbergbahn.webm/Schlossbergbahn.webm.160p.webm',
     'https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f5/STB_Stuttgart_F%C3%B6hrich_U6_Line_Entering_Station_VIDEO.webm/STB_Stuttgart_F%C3%B6hrich_U6_Line_Entering_Station_VIDEO.webm.160p.webm',
     'https://upload.wikimedia.org/wikipedia/commons/transcoded/8/87/Schlossbergbahn.webm/Schlossbergbahn.webm.160p.webm',
-    'https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.webm',
   ];
   const clipsToAppend = await Promise.all(
     vidClips.map(async (vidUrl) => {
@@ -74,6 +80,7 @@ async function sourceOpen() {
       };
     })
   );
+
   let clipIndex = 0;
   videoSourceBuffer.onupdateend = () => {
     if (clipIndex < clipsToAppend.length - 1) {
@@ -90,10 +97,12 @@ async function sourceOpen() {
     } else {
       // Done!
       //myMediaSource.endOfStream();
+      console.log(videoSourceBuffer.buffered);
       videoTag.play();
     }
   };
-  videoSourceBuffer.timestampOffset += startpoint;
+  console.log(videoSourceBuffer.buffered);
+  videoSourceBuffer.timestampOffset = startpoint;
   videoSourceBuffer.appendBuffer(clipsToAppend[clipIndex].buff);
 }
 
