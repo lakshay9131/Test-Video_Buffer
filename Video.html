@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <video id="myVideo" controls loop src="" muted>
+      Your browser does not support the video tag.
+    </video>
+    <!-- https://raw.githubusercontent.com/chromium/chromium/b4b3566f27d2814fbba1b115639eb7801dd691cf/media/test/data/bear-vp9-opus.webm
+    Downloads/Chak_de_India_2007_Full_Hindi_Movie-(Pagalmovies.world).mp4
+    /media/akshay/76E8-CACF/Dhol_-_Superhit_Bollywood_Comedy_Movie_-_Rajpal_Yadav__Kunal_Khemu__Tusshar_Kapoor__Sharman_Joshi(480p).mp4 -->
+    <video
+      controls
+      src="/media/akshay/76E8-CACF/Dhol_-_Superhit_Bollywood_Comedy_Movie_-_Rajpal_Yadav__Kunal_Khemu__Tusshar_Kapoor__Sharman_Joshi(480p).mp4"
+    >
+      Your browser does not support the video tag.
+    </video>
+
+    <p>Click the button to change the URL of the video.</p>
+
+    <button>Try it</button>
+
+    <p id="demo"></p>
+
+    <script>
+      // -- Create a MediaSource and attach it to the video (We already learned about that) --
+
+      const getDuration = (blob) => {
+        return new Promise((res) => {
+          const tempVidElem = document.createElement('video');
+          tempVidElem.onloadedmetadata = () => {
+            res(tempVidElem.duration);
+            URL.revokeObjectURL(tempVidElem.src);
+          };
+          tempVidElem.src = URL.createObjectURL(blob);
+        });
+      };
+
+      const videoTag = document.getElementById('myVideo');
+      const myMediaSource = new MediaSource();
+      console.log(myMediaSource);
+      console.log(myMediaSource.readyState);
+      const url = URL.createObjectURL(myMediaSource);
+      videoTag.src = url;
+      console.log(url);
+      myMediaSource.addEventListener('sourceopen', sourceOpen);
+
+      function sourceOpen() {
+        console.log(myMediaSource.readyState);
+
+        // 1. add source buffers
+
+        //const audioSourceBuffer = myMediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+        const videoSourceBuffer = myMediaSource.addSourceBuffer(
+          'video/webm; codecs="vp8,vorbis"'
+        ); //avc1.64001e
+        console.log(myMediaSource);
+        console.log(videoSourceBuffer.buffered);
+        console.log(videoSourceBuffer.mode);
+
+        //segments
+        //webm-->vp9,opus
+
+        // 2. download and add our audio/video to the SourceBuffers
+
+        // for the audio SourceBuffer
+        /*fetch("http://server.com/audio.mp4").then(function(response) {
+  // The data has to be a JavaScript ArrayBuffer
+  return response.arrayBuffer();
+}).then(function(audioData) {
+console.log(audioData);
+  audioSourceBuffer.appendBuffer(audioData);
+});
+*/
+
+        //https://static.videezy.com/system/resources/previews/000/044/903/original/telepoorte_fnl.mp4
+        // the same for the video SourceBuffer
+        fetch(
+          'https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.webm'
+        )
+          .then(function (response) {
+            // The data has to be a JavaScript ArrayBuffer
+
+            //add blob();
+            return response;
+          })
+          .then(async function (videoData) {
+            console.log(videoData);
+
+            console.log(videoData);
+            //var buf= await videoData.blob();
+            //console.log(buf);
+            //console.log(await getDuration(buf));
+            buf = await videoData.arrayBuffer();
+            videoSourceBuffer.appendBuffer(buf);
+          });
+
+        videoSourceBuffer.onupdateend = () => {
+          // Nothing else to load
+          console.log(videoSourceBuffer.buffered);
+          //videoSourceBuffer.timestampOffset+=10.08;
+          myMediaSource.endOfStream();
+          // Start playback!
+          // Note: this will fail if video is not muted, due to rules about
+          // autoplay and non-muted videos
+          videoTag.play();
+          console.log(myMediaSource);
+          console.log(videoSourceBuffer);
+          console.log(videoSourceBuffer.mode);
+        };
+      }
+    </script>
+  </body>
+</html>
+<!-- https://img.ly/blog/how-to-stream-videos-using-javascript-and-html5/
+
+https://joshuatz.com/posts/2020/appending-videos-in-javascript-with-mediasource-buffers/ -->
