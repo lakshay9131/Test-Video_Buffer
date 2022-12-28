@@ -28,7 +28,20 @@ const getDuration = (blob) => {
 };
 
 async function sourceOpen() {
-  console.log(myMediaSource.readyState);
+  var startpoint = 0;
+  console.log(
+    myMediaSource.readyState +
+      '  --------- ' +
+      myMediaSource.duration +
+      '    ' +
+      startpoint
+  );
+  if (myMediaSource.duration) {
+    startpoint += myMediaSource.duration;
+    console.log(
+      myMediaSource.readyState + '  --------- ' + myMediaSource.duration
+    );
+  }
 
   // 1. add source buffers
 
@@ -80,6 +93,7 @@ async function sourceOpen() {
       videoTag.play();
     }
   };
+  videoSourceBuffer.timestampOffset += startpoint;
   videoSourceBuffer.appendBuffer(clipsToAppend[clipIndex].buff);
 }
 
